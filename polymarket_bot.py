@@ -76,11 +76,11 @@ def obtener_cliente_clob():
 
     try:
         from py_clob_client.client import ClobClient
-    except ImportError:
+    except ImportError as e:
         raise ImportError(
-            "py-clob-client no está instalado. "
+            f"py-clob-client no está instalado o falla al importar: {e}. "
             "Ejecuta: pip install py-clob-client"
-        )
+        ) from e
 
     log.info("Inicializando ClobClient (chain_id=%d, sig_type=%d)…", CHAIN_ID, SIGNATURE_TYPE)
     cliente = ClobClient(
