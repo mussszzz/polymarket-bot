@@ -25,8 +25,8 @@ El bot analiza continuamente los mercados activos de [Polymarket](https://polyma
 ### 2. Clonar el repositorio
 
 ```bash
-git clone <url-del-repo>
-cd personal
+git clone https://github.com/mussszzz/polymarket-bot.git
+cd polymarket-bot
 ```
 
 ### 3. Crear entorno virtual e instalar dependencias
