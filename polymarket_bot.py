@@ -43,7 +43,7 @@ SIGNATURE_TYPE      = int(os.getenv("SIGNATURE_TYPE", 0))
 CHAIN_ID            = int(os.getenv("CHAIN_ID", 137))   # 137 = Polygon
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
@@ -157,6 +157,11 @@ def obtener_mercados_activos(limite: int = 500) -> list[dict]:
         offset += batch
 
     log.info("Mercados activos obtenidos: %d", len(mercados))
+    if mercados:
+        m = mercados[0]
+        token_fields = {k: v for k, v in m.items()
+                        if any(x in k.lower() for x in ("token", "outcome", "clob", "price"))}
+        log.debug("Campos de ejemplo en primer mercado: %s", token_fields)
     return mercados
 
 
