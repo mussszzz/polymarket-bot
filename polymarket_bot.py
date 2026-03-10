@@ -181,12 +181,37 @@ def mejor_precio_ask(orderbook: dict) -> float | None:
 # ---------------------------------------------------------------------------
 
 def extraer_token_ids(mercado: dict) -> dict:
-    """Extrae los token IDs de YES y NO de un mercado."""
+    """Extrae los token IDs de YES y NO de un mercado.
+
+    Soporta el formato de la Gamma API (clobTokenIds + outcomes)
+    y el formato del CLOB API (tokens[].token_id).
+    """
     tokens = {}
+
+    # Formato Gamma API: clobTokenIds es lista paralela a outcomes
+    clob_ids = mercado.get("clobTokenIds", [])
+    outcomes = mercado.get("outcomes", [])
+
+    # outcomes puede venir como string JSON: '["Yes","No"]'
+    if isinstance(outcomes, str):
+        import json
+        try:
+            outcomes = json.loads(outcomes)
+        except (json.JSONDecodeError, ValueError):
+            outcomes = []
+
+    if clob_ids and outcomes:
+        for i, outcome in enumerate(outcomes):
+            if i < len(clob_ids) and clob_ids[i]:
+                tokens[str(outcome).upper()] = clob_ids[i]
+        return tokens
+
+    # Formato CLOB API: lista de objetos token
     for token in mercado.get("tokens", []):
         outcome = token.get("outcome", "").upper()
         if outcome in ("YES", "NO"):
             tokens[outcome] = token.get("token_id", "")
+
     return tokens
 
 
