@@ -83,13 +83,16 @@ def obtener_cliente_clob():
         ) from e
 
     log.info("Inicializando ClobClient (chain_id=%d, sig_type=%d)…", CHAIN_ID, SIGNATURE_TYPE)
-    cliente = ClobClient(
-        CLOB_API_BASE,
+    # funder solo se usa con signature_type 1/2 (proxy wallets).
+    # Con signature_type=0 (EOA) pasarlo corrompe los headers L1.
+    clob_kwargs = dict(
         key=WALLET_PRIVATE_KEY,
         chain_id=CHAIN_ID,
         signature_type=SIGNATURE_TYPE,
-        funder=WALLET_ADDRESS,
     )
+    if SIGNATURE_TYPE in (1, 2) and WALLET_ADDRESS:
+        clob_kwargs["funder"] = WALLET_ADDRESS
+    cliente = ClobClient(CLOB_API_BASE, **clob_kwargs)
 
     creds = cliente.create_or_derive_api_creds()
     cliente.set_api_creds(creds)
