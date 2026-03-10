@@ -43,7 +43,7 @@ SIGNATURE_TYPE      = int(os.getenv("SIGNATURE_TYPE", 0))
 CHAIN_ID            = int(os.getenv("CHAIN_ID", 137))   # 137 = Polygon
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
@@ -157,11 +157,6 @@ def obtener_mercados_activos(limite: int = 500) -> list[dict]:
         offset += batch
 
     log.info("Mercados activos obtenidos: %d", len(mercados))
-    if mercados:
-        m = mercados[0]
-        token_fields = {k: v for k, v in m.items()
-                        if any(x in k.lower() for x in ("token", "outcome", "clob", "price"))}
-        log.debug("Campos de ejemplo en primer mercado: %s", token_fields)
     return mercados
 
 
@@ -197,9 +192,14 @@ def extraer_token_ids(mercado: dict) -> dict:
     clob_ids = mercado.get("clobTokenIds", [])
     outcomes = mercado.get("outcomes", [])
 
-    # outcomes puede venir como string JSON: '["Yes","No"]'
+    # Ambos campos pueden venir como string JSON: '["Yes","No"]'
+    import json
+    if isinstance(clob_ids, str):
+        try:
+            clob_ids = json.loads(clob_ids)
+        except (json.JSONDecodeError, ValueError):
+            clob_ids = []
     if isinstance(outcomes, str):
-        import json
         try:
             outcomes = json.loads(outcomes)
         except (json.JSONDecodeError, ValueError):
